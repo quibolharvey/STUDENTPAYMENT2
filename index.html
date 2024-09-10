@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tuition</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="form-container">
+    <div class="form-box">
+      <h2>Student Payment Form</h2>
+      <form id="tuitionForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="tuition">Tuition Fee:</label>
+        <input type="number" id="tuition" name="tuition" required>
+
+        <label for="miscellaneous">Miscellaneous:</label>
+        <input type="number" id="miscellaneous" name="miscellaneous" required>
+
+        <label for="others">Others:</label>
+        <input type="number" id="others" name="others" required>
+
+        <button type="button" onclick="submitPayment()">Submit</button>
+      </form>
+    </div>
+
+    <div class="result-box">
+      <h2>Submitted Payments</h2>
+      <div id="results"></div>
+      <div class="total" id="total">Total: ₱0.00</div>
+    </div>
+  </div>
+
+  <script>
+    let totalSubmittedPayments = 0;
+    let payments = [];
+
+    function submitPayment() {
+      const name = document.getElementById("name").value;
+      const tuition = parseFloat(document.getElementById("tuition").value);
+      const miscellaneous = parseFloat(document.getElementById("miscellaneous").value);
+      const others = parseFloat(document.getElementById("others").value);
+
+      if (name && !isNaN(tuition) && !isNaN(miscellaneous) && !isNaN(others)) {
+        const paymentTotal = tuition + miscellaneous + others;
+        const payment = {
+          id: Date.now(),
+          name,
+          tuition,
+          miscellaneous,
+          others,
+          total: paymentTotal
+        };
+        payments.push(payment);
+        updateResults();
+        resetForm();
+      } else {
+        alert('Please fill out all fields correctly before submitting.');
+      }
+    }
+
+    function updateResults() {
+      let results = '';
+      totalSubmittedPayments = 0;
+
+      payments.forEach(payment => {
+        results += `
+          <div id="payment-${payment.id}">
+            <p><strong>Payment</strong></p>
+            <p>Name: ${payment.name}</p>
+            <p>Tuition Fee: ₱${payment.tuition.toFixed(2)}</p>
+            <p>Miscellaneous: ₱${payment.miscellaneous.toFixed(2)}</p>
+            <p>Others: ₱${payment.others.toFixed(2)}</p>
+            <p><strong>Subtotal: ₱${payment.total.toFixed(2)}</strong></p>
+            <div class="button-container">
+              <button onclick="editPayment(${payment.id})">Edit</button>
+              <button onclick="deletePayment(${payment.id})">Delete</button>
+            </div>
+          </div>
+        `;
+        totalSubmittedPayments += payment.total;
+      });
+
+      document.getElementById("results").innerHTML = results;
+      document.getElementById("total").innerText = `Total: ₱${totalSubmittedPayments.toFixed(2)}`;
+    }
+
+    function resetForm() {
+      document.getElementById("tuitionForm").reset();
+    }
+
+    function editPayment(id) {
+      const payment = payments.find(p => p.id === id);
+      if (payment) {
+        document.getElementById("name").value = payment.name;
+        document.getElementById("tuition").value = payment.tuition;
+        document.getElementById("miscellaneous").value = payment.miscellaneous;
+        document.getElementById("others").value = payment.others;
+
+        payments = payments.filter(p => p.id !== id);
+        updateResults();
+      }
+    }
+
+    function deletePayment(id) {
+      payments = payments.filter(p => p.id !== id);
+      updateResults();
+    }
+  </script>
+</body>
+</html>
